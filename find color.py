@@ -6,6 +6,7 @@ def empty(v):
 
 cap = cv2.VideoCapture(0)
 
+# create a window to find values of color
 cv2.namedWindow('TrackBar')
 cv2.resizeWindow('TrackBar', 640, 320)
 
@@ -17,10 +18,11 @@ cv2.createTrackbar('Val Min', 'TrackBar', 0, 255, empty)
 cv2.createTrackbar('Val Max', 'TrackBar', 255, 255, empty)
 
 while True:
+    # get values
     ret, frame = cap.read()
     if ret:
         img = frame.copy()
-        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)  # change BGR to HSV
         h_min = cv2.getTrackbarPos('Hue Min', 'TrackBar')
         h_max = cv2.getTrackbarPos('Hue Max', 'TrackBar')
         s_min = cv2.getTrackbarPos('Sat Min', 'TrackBar')
@@ -31,7 +33,8 @@ while True:
     
         lower = np.array([h_min, s_min, v_min])
         upper = np.array([h_max, s_max, v_max])
-    
+
+        # filter the color
         mask = cv2.inRange(hsv, lower, upper)
     
         result = cv2.bitwise_and(img, img, mask=mask)

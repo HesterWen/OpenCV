@@ -5,35 +5,40 @@ import numpy as np
 cap = cv2.VideoCapture(0)
 
 # Blue Green Red
-penColorHSV = [[91, 187, 30, 151, 255, 166],
-               [77, 97, 30, 91, 255, 182],
-               [0, 139, 145, 179, 255, 195]]
+penColorHSV = [[78, 144, 12, 137, 255, 162],
+               [67, 83, 65, 95, 214, 96],
+               [0, 107, 114, 179, 237, 216]]
 
+# colors of pen tips
 penColorBGR = [[255, 0, 0], 
                [0, 255, 0],
                [0, 0, 255]]
 
+# record positions and color of every pen
 # [x, y, colorId(0:B; 1:G; 2:R)]
 drawPoints = []
 
 
 def findPen(img):
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)  # change BGR to HSV
     
+    # find every color
     for i in range(len(penColorHSV)):
         lower = np.array(penColorHSV[i][:3])  
         upper = np.array(penColorHSV[i][3:6])  
         
-        mask = cv2.inRange(hsv, lower, upper)
-        result = cv2.bitwise_and(img, img, mask=mask)
+        mask = cv2.inRange(hsv, lower, upper)  # filter the color
+        result = cv2.bitwise_and(img, img, mask=mask)  # use mask to get the right color
         penx, peny = findContour(mask)
         cv2.circle(imgContour, (penx, peny), 10, penColorBGR[i], cv2.FILLED)
         
+        # check whether it find the contour
         if peny != -1:  
             drawPoints.append([penx, peny, i])
         cv2.imshow('result', result)
     
 def findContour(img):
+    # find the shape of the pen
     contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     
     x, y, w, h = -1, -1, -1, -1
@@ -41,9 +46,10 @@ def findContour(img):
         area = cv2.contourArea(cnt)
         if area > 500:
             peri = cv2.arcLength(cnt, True)
-            vertices = cv2.approxPolyDP(cnt, peri * 0.02, True)
-            x, y, w, h = cv2.boundingRect(vertices)
-        
+            vertices = cv2.approxPolyDP(cnt, peri * 0.02, True)  # speculate which shape 
+            x, y, w, h = cv2.boundingRect(vertices)  # frame 
+    
+    # return the spot of pen tip   
     return x+w//4, y   
 
 
